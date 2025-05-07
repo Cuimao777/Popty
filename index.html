@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>甜梦守护者：糖果秘境奇旅 (触屏版)</title>
+    <style>
+        /* CSS与上一版“动态渐变”的视觉风格完全一致 */
+        /* 为确保完整性，这里会粘贴完整的CSS，但内容与上一版相同 */
+        :root { /* ... (颜色变量与上一版动态渐变一致) ... */ --apple-blue: #007aff; --apple-gray-text: #1d1d1f; --apple-gray-text-secondary: #6e6e73; --apple-glass-bg: rgba(255, 255, 255, 0.7); --apple-ultralight-glass-bg: rgba(255, 255, 255, 0.85); --apple-separator-color: rgba(60, 60, 67, 0.2); --game-pink-cute-primary: #ffb6c1; --game-pink-cute-secondary: #ffc0cb; --game-cream-bg: #fff0f5; --game-white: #ffffff; --game-flesh-tone: #ffeadb; --game-mint-green: #98fb98; --game-light-blue: #add8e6; --game-light-yellow: #ffffe0; --game-outline-soft: #d18691; --grad-color-stop1: #ffb3ba; --grad-color-stop2: #ffdfba; --grad-color-stop3: #ffffba; --grad-color-stop4: #baffc9; --grad-color-stop5: #bae1ff; }
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: var(--game-cream-bg); display: flex; justify-content: center; align-items: center; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; overscroll-behavior: none; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+        #game-wrapper { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        #game-container { width: 450px; height: 700px; position: relative; cursor: none; overflow: hidden; touch-action: none; /* CRITICAL for touch */ border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); transition: width 0.3s ease, height 0.3s ease, border-radius 0.3s ease; background: linear-gradient( 135deg, var(--grad-color-stop1), var(--grad-color-stop2), var(--grad-color-stop3), var(--grad-color-stop4), var(--grad-color-stop5), var(--grad-color-stop1) ); background-size: 300% 300%; animation: dreamyGradient 30s ease infinite, pulseBrightness 6s ease-in-out infinite alternate; }
+        @keyframes dreamyGradient { 0% { background-position: 0% 50%; } 25% { background-position: 100% 0%; } 50% { background-position: 100% 100%; } 75% { background-position: 0% 100%; } 100% { background-position: 0% 50%; } }
+        @keyframes pulseBrightness { 0% { filter: brightness(0.95) saturate(0.95); } 100% { filter: brightness(1.05) saturate(1.05); } }
+        #game-container:fullscreen, #game-container:-webkit-full-screen, #game-container:-moz-full-screen, #game-container:-ms-fullscreen { width: 100vw!important; height: 100vh!important; border-radius: 0!important; margin:0; }
+        #hud-layer { position: absolute; top: 18px; left: 18px; right: 18px; z-index: 10; display: flex; justify-content: space-between; align-items: center; padding: 10px 15px; background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(18px) saturate(130%); -webkit-backdrop-filter: blur(18px) saturate(130%); border-radius: 25px; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 2px 8px rgba(0,0,0,0.07); pointer-events: none; }
+        #hud-layer span { color: var(--apple-gray-text-secondary); font-size: 14px; font-weight: 500; margin: 0 5px; }
+        #hud-layer #skill-charge-ui.ready { color: var(--apple-blue); font-weight: 600; }
+        #hud-layer #lives::before { content: '♥'; color: var(--game-pink-cute-primary); margin-right: 4px; font-size: 1.1em; vertical-align: middle;}
+        #hud-layer #weapon-level::before { content: '✧'; color: var(--apple-blue); margin-right: 4px; font-size: 1.2em; vertical-align: middle;}
+        #boss-health-bar-container { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 220px; height: 8px; background-color: var(--apple-separator-color); border-radius: 4px; display: none; z-index: 10; pointer-events: none; overflow: hidden; }
+        #boss-health-bar { width: 100%; height: 100%; background-color: var(--game-pink-cute-primary); border-radius: 4px; transition: width 0.2s ease-out; }
+        #start-screen, #game-over-screen { position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; z-index: 20; padding: 25px; background-color: transparent; backdrop-filter: blur(22px) brightness(0.85) saturate(110%); -webkit-backdrop-filter: blur(22px) brightness(0.85) saturate(110%); }
+        .screen-content-panel { background: var(--apple-ultralight-glass-bg); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border-radius: 18px; padding: 35px 40px; border: 1px solid rgba(0, 0, 0, 0.06); box-shadow: 0 10px 40px rgba(0,0,0,0.1); max-width: calc(100% - 40px); color: var(--apple-gray-text); }
+        .screen-content-panel h1 { font-size: 2.4em; color: var(--apple-gray-text); font-weight: 600; margin-bottom: 8px; text-shadow: none; }
+        .screen-content-panel h2 { font-size: 1.2em; color: var(--apple-gray-text-secondary); font-weight: 500; margin-bottom: 20px; text-shadow: none; }
+        .screen-content-panel p { font-size: 1.0em; color: var(--apple-gray-text-secondary); margin-bottom: 28px; line-height: 1.6; }
+        .apple-button { padding: 12px 24px; font-size: 0.95em; font-weight: 500; border-radius: 22px; cursor: pointer; transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s; user-select: none; border: none; display: inline-block; min-width: 110px; }
+        .apple-button.primary { background-color: var(--apple-blue); color: white; box-shadow: 0 1px 4px rgba(0, 122, 255, 0.2); }
+        .apple-button.primary:hover { background-color: #0070e0; box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3); transform: translateY(-1px) scale(1.02); }
+        .apple-button.secondary { background-color: rgba(229, 229, 234, 0.8); color: var(--apple-blue); }
+        .apple-button.secondary:hover { background-color: rgba(215, 215, 220, 0.85); transform: translateY(-1px) scale(1.02); }
+        .controls-info { margin-top: 20px; font-size: 0.8em; color: var(--apple-gray-text-secondary); opacity: 0.75; }
+        #player { position: absolute; width: 50px; height: 50px; transition: transform 0.08s linear, opacity 0.1s; pointer-events: none; }
+        .player-sprite-body { fill: var(--game-flesh-tone); stroke: var(--game-outline-soft); stroke-width: 2; }
+        .player-sprite-wing { fill: rgba(255, 255, 255, 0.8); stroke: var(--game-pink-cute-secondary); stroke-width: 1.5;}
+        .bullet { position: absolute; background-color: var(--game-pink-cute-secondary); box-shadow: 0 0 5px var(--game-pink-cute-secondary), 0 0 10px var(--game-white); border-radius: 50%; pointer-events: none; }
+        .enemy-bullet { position: absolute; background-color: var(--game-mint-green); box-shadow: 0 0 5px var(--game-mint-green); border-radius: 50%; width: 8px; height: 8px; pointer-events: none; }
+        .enemy { position: absolute; pointer-events: none; transition: filter 0.05s; }
+        .enemy-svg-path { fill: var(--game-pink-cute-primary); stroke: var(--game-outline-soft); stroke-width: 1.5; fill-opacity: 1; }
+        .boss-svg-path { stroke-width: 2;}
+        .power-up { position: absolute; width: 25px; height: 25px; border-radius: 50%; font-weight: bold; display: flex; justify-content: center; align-items: center; color: white; text-shadow: 1px 1px 2px black; pointer-events: none; font-size: 14px; }
+        .power-up-p { background-color: var(--game-pink-cute-primary); border: 2px solid var(--game-white); }
+        .power-up-s { background-color: var(--game-light-blue); border: 2px solid var(--game-white); }
+        .power-up-plus { background-color: var(--game-light-yellow); border: 2px solid var(--game-white); color: #eca03c; }
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <!-- HTML Structure (same as previous version) -->
+    <div id="game-wrapper"> <div id="game-container"> <div id="hud-layer"> <span id="score">分数: 0</span> <span id="lives">3</span> <span id="weapon-level">1</span> <span id="skill-charge-ui">技能: 0%</span> </div> <div id="boss-health-bar-container"> <div id="boss-health-bar"></div> </div> <div id="player"></div> <div id="start-screen"> <div class="screen-content-panel"> <h1>甜梦守护者</h1> <h2>糖果秘境奇旅</h2> <p>收集闪亮星尘，守护甜美的梦境！<br>用你的勇气，击退淘气的糖果怪！</p> <button class="apple-button primary" id="start-button">开启甜梦</button> <button class="apple-button secondary" id="fullscreen-button" style="margin-top: 15px;">切换全屏</button> <div class="controls-info"> 滑动屏幕移动 &nbsp;&nbsp;|&nbsp;&nbsp; 快速双击屏幕释放技能 </div> </div> </div> <div id="game-over-screen" style="display: none;"> <div class="screen-content-panel"> <h1 id="game-over-title">旅途暂歇</h1> <p id="final-score">你的最终探索深度: 0</p> <button class="apple-button secondary" id="restart-button">再次启程</button> <button class="apple-button secondary" id="exit-fullscreen-button-gameover" style="margin-top: 15px; display:none;">退出全屏</button> </div> </div> </div> </div>
+
+    <script>
+        console.log("甜梦守护者 (触屏版): Script loading...");
+
+        const gameWrapper = document.getElementById('game-wrapper');
+        const gameContainer = document.getElementById('game-container');
+        const playerElement = document.getElementById('player');
+        const scoreDisplayElement = document.getElementById('score'); 
+        const livesDisplayElement = document.getElementById('lives');   
+        const weaponLevelDisplayElement = document.getElementById('weapon-level'); 
+        const skillChargeUIDisplay = document.getElementById('skill-charge-ui');
+        const bossHealthContainer = document.getElementById('boss-health-bar-container');
+        const bossHealthBar = document.getElementById('boss-health-bar');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const gameOverTitle = document.getElementById('game-over-title');
+        const startButton = document.getElementById('start-button');
+        const restartButton = document.getElementById('restart-button');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const fullscreenButton = document.getElementById('fullscreen-button');
+        const exitFullscreenButtonGameover = document.getElementById('exit-fullscreen-button-gameover');
+
+        let GAME_WIDTH = gameContainer.clientWidth;
+        let GAME_HEIGHT = gameContainer.clientHeight;
+        let audioCtx; 
+        let player = {}; 
+        let bullets, enemyBullets, enemies, powerUps, particles, boss;
+        let keys = {}; // Keep for keyboard controls as fallback or for desktop
+        let gameState = 'start';
+        let scoreForBoss, enemySpawnTimer, baseEnemySpawnInterval;
+        let bossActive = false;
+        let gameLoopId = null;
+
+        // --- Touch Control Variables ---
+        let touching = false;
+        let lastTouchEndTime = 0;
+        const DOUBLE_TAP_THRESHOLD = 350; // Milliseconds, slightly increased for easier double tap
+
+        // --- Audio, SVG, Game Logic (Most functions are same as "Startup Fixed v2" / "Dynamic Gradient") ---
+        // initAudio, playSound, SVG definitions, createSVG functions, 
+        // updatePlayerSVG, initGame (will call setupTouchControls), updateUI, 
+        // createBullet, createEnemy, createBoss, etc.
+        // gameLoop (will use touch variables for player movement if `touching` is true, otherwise keyboard)
+
+        function initAudio() { /* ... (same as "Startup Fixed v2") ... */ if (!audioCtx && (window.AudioContext || window.webkitAudioContext)) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.error("AudioContext resume failed:", e)); } } catch (e) { console.error("Failed to create AudioContext:", e); audioCtx = null; } } else if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume().catch(e => console.error("AudioContext resume failed:", e)); } }
+        function playSound(type, volume = 0.07, duration = 0.05, freq1 = 440, freq2 = 440) { /* ... (same as "Startup Fixed v2") ... */ if (!audioCtx || audioCtx.state !== 'running') { return; } const oscillator = audioCtx.createOscillator(); const gainNode = audioCtx.createGain(); oscillator.connect(gainNode); gainNode.connect(audioCtx.destination); gainNode.gain.setValueAtTime(volume, audioCtx.currentTime); oscillator.frequency.setValueAtTime(freq1, audioCtx.currentTime); if (freq1 !== freq2) { oscillator.frequency.linearRampToValueAtTime(freq2, audioCtx.currentTime + duration); } if (type === 'shoot') { oscillator.type = 'triangle'; freq1=770; freq2=990; volume = 0.05; } else if (type === 'explosion_small') { oscillator.type = 'square'; freq1=300; freq2=100; volume = 0.08; gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration * 1.8); } else if (type === 'explosion_large' || type === 'skill') { oscillator.type = 'sawtooth'; freq1=500; freq2=50; duration = type==='skill' ? 0.35 : 0.25; volume = type === 'skill' ? 0.15 : 0.12; gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration * 1.5); } else if (type === 'powerup') { oscillator.type = 'sine'; freq1=880; freq2=1300; duration = 0.12; volume = 0.1; } else if (type === 'hit') { oscillator.type = 'square'; freq1=220; freq2=60; duration = 0.1; volume = 0.1; gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration); } oscillator.start(audioCtx.currentTime); oscillator.stop(audioCtx.currentTime + duration); }
+        const SVG_NS = "http://www.w3.org/2000/svg"; const PLAYER_SPRITE_BODY_PATH = "M25,12 C18,12 12,18 12,28 C12,38 18,48 25,48 C32,48 38,38 38,28 C38,18 32,12 25,12 Z"; const PLAYER_SPRITE_WING_PATH_LEFT = "M15,20 C5,15 8,5 20,15 Q15,25 15,20 Z"; const PLAYER_SPRITE_WING_PATH_RIGHT = "M35,20 C45,15 42,5 30,15 Q35,25 35,20 Z"; const ENEMY_COTTONCANDY_PATH = "M25,5 C10,5 5,15 5,30 C5,45 10,50 25,50 C40,50 45,45 45,30 C45,15 40,5 25,5 Z M15,38 Q20,43 25,38 Q30,43 35,38 M18,22 A3,3 0 1,1 17.9,22 M32,22 A3,3 0 1,1 31.9,22"; const ENEMY_COTTONCANDY_COLOR = { fill: "rgba(255,255,255,0.8)", stroke: "var(--game-pink-cute-secondary)" }; const BOSS_DONUT_OUTER_PATH = "M50,5 A45,45 0 1,1 49.9,5 Z"; const BOSS_DONUT_INNER_PATH = "M50,25 A25,25 0 1,1 49.9,25 Z"; const BOSS_DONUT_EYE_LEFT_PATH = "M35,35 A5,5 0 1,1 34.9,35 Z"; const BOSS_DONUT_EYE_RIGHT_PATH = "M65,35 A5,5 0 1,1 64.9,35 Z"; const BOSS_DONUT_COLORS = { donut_body: { fill: "#f5deb3", stroke: "#d2b48c", strokeWidth: "3" }, donut_icing: { fill: "var(--game-pink-cute-primary)", stroke: "var(--game-pink-cute-secondary)", strokeWidth: "2"}, eye: { fill: "#5c3a1a", stroke: "#3b240d" }};
+        function createPlayerSpriteSVG(size) { const svg = document.createElementNS(SVG_NS, "svg"); svg.setAttribute("width", size.w); svg.setAttribute("height", size.h); svg.setAttribute("viewBox", "0 0 50 50"); const wingL = document.createElementNS(SVG_NS, "path"); wingL.setAttribute("d", PLAYER_SPRITE_WING_PATH_LEFT); wingL.classList.add("player-sprite-wing"); svg.appendChild(wingL); const wingR = document.createElementNS(SVG_NS, "path"); wingR.setAttribute("d", PLAYER_SPRITE_WING_PATH_RIGHT); wingR.classList.add("player-sprite-wing"); svg.appendChild(wingR); const body = document.createElementNS(SVG_NS, "path"); body.setAttribute("d", PLAYER_SPRITE_BODY_PATH); body.classList.add("player-sprite-body"); svg.appendChild(body); return svg; }
+        function createGenericSVGElement(pathData, size, colors, className = "enemy-svg-path") { const svg = document.createElementNS(SVG_NS, "svg"); svg.setAttribute("width", size.w); svg.setAttribute("height", size.h); svg.setAttribute("viewBox", "0 0 50 50"); const path = document.createElementNS(SVG_NS, "path"); path.setAttribute("d", pathData); if(colors.fill) path.style.fill = colors.fill; if(colors.stroke) path.style.stroke = colors.stroke; if(colors.strokeWidth) path.style.strokeWidth = colors.strokeWidth; path.classList.add(className); svg.appendChild(path); return svg; }
+        function createDonutBossSVG(size) { const svg = document.createElementNS(SVG_NS, "svg"); svg.setAttribute("width", size.w); svg.setAttribute("height", size.h); svg.setAttribute("viewBox", "0 0 100 100"); const donutBase = document.createElementNS(SVG_NS, "path"); donutBase.setAttribute("d", `${BOSS_DONUT_OUTER_PATH} ${BOSS_DONUT_INNER_PATH}`); donutBase.style.fill = BOSS_DONUT_COLORS.donut_body.fill; donutBase.setAttribute("fill-rule", "evenodd"); donutBase.style.stroke = BOSS_DONUT_COLORS.donut_body.stroke; donutBase.style.strokeWidth = BOSS_DONUT_COLORS.donut_body.strokeWidth; svg.appendChild(donutBase); const icing = document.createElementNS(SVG_NS, "path"); icing.setAttribute("d", `M50,10 A40,40 0 1,1 49.9,10 Z M50,30 A20,20 0 1,1 49.9,30 Z`); icing.style.fill = BOSS_DONUT_COLORS.donut_icing.fill; icing.setAttribute("fill-rule", "evenodd"); icing.style.stroke = BOSS_DONUT_COLORS.donut_icing.stroke; icing.style.strokeWidth = BOSS_DONUT_COLORS.donut_icing.strokeWidth; svg.appendChild(icing); const eyeL = document.createElementNS(SVG_NS, "path"); eyeL.setAttribute("d", BOSS_DONUT_EYE_LEFT_PATH); eyeL.style.fill = BOSS_DONUT_COLORS.eye.fill; svg.appendChild(eyeL); const eyeR = document.createElementNS(SVG_NS, "path"); eyeR.setAttribute("d", BOSS_DONUT_EYE_RIGHT_PATH); eyeR.style.fill = BOSS_DONUT_COLORS.eye.fill; svg.appendChild(eyeR); return svg; }
+        function updatePlayerSVG() { if (player.svgElement && player.svgElement.parentNode === playerElement) { playerElement.removeChild(player.svgElement); } player.svgElement = createPlayerSpriteSVG({w: player.w, h: player.h}); playerElement.appendChild(player.svgElement); }
+        function createEnemy() { const tr = Math.random(); let ned; const xp = Math.random() * (GAME_WIDTH - 40); ned = { type: 'cottoncandy', speed: 1.6 + Math.random()*0.6, health: 2, points: 10, shootCD: 0, maxShootCD: 95 + Math.random() * 45, svgP: ENEMY_COTTONCANDY_PATH, svgC: ENEMY_COTTONCANDY_COLOR, w:35, h:35}; const ne = { x: xp, y: -ned.h, ...ned }; const ee = document.createElement('div'); ee.className = 'enemy'; ee.style.width = ne.w + 'px'; ee.style.height = ne.h + 'px'; const svg = createGenericSVGElement(ne.svgP, {w: ne.w, h: ne.h}, ne.svgC, "enemy-svg-path"); ee.appendChild(svg); gameContainer.appendChild(ee); ne.element = ee; enemies.push(ne); }
+        function createBoss() { bossActive = true; bossHealthContainer.style.display = 'block'; const bossSize = {w: 150, h: 150}; boss = { x: GAME_WIDTH / 2 - bossSize.w / 2, y: 50, w: bossSize.w, h: bossSize.h, type: 'donutking', health: 250 + player.weaponLevel * 80, maxHealth: 250 + player.weaponLevel * 80, points: 600, shootCD1: 0, maxShootCD1: 55, shootCD2: 0, maxShootCD2: 150, attackPattern: 'spread', moveDir: 1, moveSpeed: 0.6, element: document.createElement('div'), svgElement: null }; boss.element.className = 'enemy'; boss.element.style.width = boss.w + 'px'; boss.element.style.height = boss.h + 'px'; boss.svgElement = createDonutBossSVG({w: boss.w, h: boss.h}); boss.element.appendChild(boss.svgElement); gameContainer.appendChild(boss.element); updateBossHealthBar(); }
+        function enemyShootLogic(enemy) { if (enemy.type === 'cottoncandy') { createEnemyBullet(enemy, 'straight'); }}
+        function bossShootLogic() { if (!boss) return; boss.shootCD1--; if (boss.shootCD1 <= 0) { playSound('shoot', 0.1, 0.08, 280, 180); for(let k=0; k<3; k++){ createEnemyBullet(boss, 'boss_spread5'); } boss.shootCD1 = boss.maxShootCD1; } boss.shootCD2--; if (boss.shootCD2 <= 0) { playSound('shoot', 0.12, 0.15, 180, 120); createEnemyBullet(boss, 'boss_ring12'); boss.shootCD2 = boss.maxShootCD2; }}
+        function initGame() { /* ... (same as "Startup Fixed v2", but will call setupTouchControls at the end) ... */ console.log("initGame called from source:", new Error().stack.split('\n')[1]?.trim().split(' ')[0] || "Unknown"); GAME_WIDTH = gameContainer.clientWidth; GAME_HEIGHT = gameContainer.clientHeight; player = { x: GAME_WIDTH / 2 - 25, y: GAME_HEIGHT - 70, w: 50, h: 50, speed: 4.8, lives: 3, score: 0, weaponLevel: 1, shootCooldown: 0, maxShootCooldown: 19, skillCharge: 0, maxSkillCharge: 100, skillReady: false, isHit: false, hitTimer: 0, svgElement: null }; updatePlayerSVG(); bullets = []; enemyBullets = []; enemies = []; powerUps = []; particles = []; boss = null; bossActive = false; enemySpawnTimer = 0; baseEnemySpawnInterval = 110; scoreForBoss = Math.floor(Math.random() * 700) + 1300; document.querySelectorAll('.bullet, .enemy-bullet, .enemy, .power-up, .particle').forEach(el => { if(el.parentNode) el.parentNode.removeChild(el) }); updateUI(); bossHealthContainer.style.display = 'none'; gameOverScreen.style.display = 'none'; startScreen.style.display = 'none'; gameState = 'playing'; if (gameLoopId) cancelAnimationFrame(gameLoopId); gameLoopId = requestAnimationFrame(gameLoop); setupTouchControls(); /* ADDED THIS */ console.log("initGame finished, touch controls set up."); }
+        function updateUI() { /* ... (same as "Startup Fixed v2") ... */ if (!player || typeof player.score === 'undefined') { return; } scoreDisplayElement.textContent = `分数: ${player.score}`; livesDisplayElement.textContent = player.lives; weaponLevelDisplayElement.textContent = player.weaponLevel; const skillPercentage = Math.min(100, Math.floor((player.skillCharge / player.maxSkillCharge) * 100)); skillChargeUIDisplay.textContent = `技能: ${player.skillReady ? '就绪!' : skillPercentage + '%'}`; skillChargeUIDisplay.classList.toggle('ready', player.skillReady); }
+        function createBullet() { /* ... (same as "Startup Fixed v2") ... */ playSound('shoot'); const bs = 6; const spd = 7.5; let nbs = []; if (player.weaponLevel === 1) { nbs.push({ x: player.x + player.w / 2 - bs / 2, y: player.y, w: bs, h: bs * 2, speed: spd, type: 'player' }); } else if (player.weaponLevel === 2) { nbs.push({ x: player.x + player.w / 4 - bs / 2 + 2, y: player.y, w: bs, h: bs * 2, speed: spd, type: 'player' }); nbs.push({ x: player.x + (player.w * 3 / 4) - bs / 2 - 2, y: player.y, w: bs, h: bs * 2, speed: spd, type: 'player' }); } else { const ang = 16 * Math.PI/180; nbs.push({ x: player.x + player.w / 2 - bs / 2, y: player.y, w: bs, h: bs * 2, speed: spd, dx: 0, dy: -1, type: 'player' }); nbs.push({ x: player.x + player.w / 2 - bs / 2, y: player.y, w: bs, h: bs * 2, speed: spd, dx: Math.sin(ang), dy: -Math.cos(ang), type: 'player' }); nbs.push({ x: player.x + player.w / 2 - bs / 2, y: player.y, w: bs, h: bs * 2, speed: spd, dx: -Math.sin(ang), dy: -Math.cos(ang), type: 'player' }); } nbs.forEach(b => { b.element = document.createElement('div'); b.element.className = 'bullet'; b.element.style.width = b.w + 'px'; b.element.style.height = b.h + 'px'; gameContainer.appendChild(b.element); bullets.push(b); }); }
+        function createEnemyBullet(enemy, type = 'normal') { /* ... (same as "Startup Fixed v2") ... */ const bs = 8; const spd = 3.3; let nbs = []; const ox = enemy.x + enemy.w / 2 - bs/2; const oy = enemy.y + enemy.h; if (type === 'straight') { nbs.push({x: ox, y: oy, w: bs, h: bs, speed: spd, type: 'enemy'}); } else if (type === 'spread3') { for (let i = -1; i <= 1; i++) { nbs.push({x: ox, y: oy, w: bs, h: bs, speed: spd * 0.88, dx: i * 0.38, dy: 1, type: 'enemy'}); }} else if (type === 'homing_slight') { if (!player || typeof player.x === 'undefined') return; const dx = player.x + player.w/2 - ox; const dy = player.y + player.h/2 - oy; const dist = Math.sqrt(dx*dx + dy*dy) || 1; nbs.push({x: ox, y: oy, w: bs, h: bs, speed: spd * 0.68, dx: (dx/dist) * 0.28, dy: (dy/dist) * 0.72, type: 'enemy'});} else if (type === 'boss_spread5') { for (let i = 0; i < 5; i++) { const ang = (i - 2) * 16 * (Math.PI / 180); nbs.push({x: ox, y: enemy.y + enemy.h - 20, w: bs*1.2, h: bs*1.2, speed: spd, dx: Math.sin(ang), dy: Math.cos(ang), type: 'enemy'}); }} else if (type === 'boss_ring12') { const num = 12; for (let i = 0; i < num; i++) { const ang = (360 / num) * i * (Math.PI / 180); nbs.push({x: ox, y: enemy.y + enemy.h/2, w: bs*0.9, h: bs*0.9, speed: spd * 0.78, dx: Math.sin(ang), dy: Math.cos(ang), type: 'enemy'});}} nbs.forEach(eb => { eb.element = document.createElement('div'); eb.element.className = 'enemy-bullet'; eb.element.style.width = eb.w + 'px'; eb.element.style.height = eb.h + 'px'; if (eb.dx !== undefined && (eb.dx < -0.01 || eb.dx > 0.01)) { eb.element.style.transform = `rotate(${Math.atan2(eb.dx, -eb.dy) * 180/Math.PI}deg)`;} gameContainer.appendChild(eb.element); enemyBullets.push(eb); }); }
+        function createPowerUp(x, y) { /* ... (same as "Startup Fixed v2") ... */ const tr = Math.random(); let tc = 'P', cn = 'power-up-p'; if (tr < 0.5) { tc = 'P'; cn = 'power-up-p'; } else if (tr < 0.8) { tc = 'S'; cn = 'power-up-s'; } else { tc = '+'; cn = 'power-up-plus'; } const pue = document.createElement('div'); pue.className = 'power-up ' + cn; pue.textContent = tc; gameContainer.appendChild(pue); powerUps.push({ x, y, w: 25, h: 25, type: tc, speed: 1.7, element: pue }); }
+        function createExplosion(x, y, size, count = 10, color = "var(--game-pink-primary)") { /* ... (same as "Startup Fixed v2") ... */ playSound('explosion_small'); for (let i = 0; i < count; i++) { const pe = document.createElement('div'); pe.className = 'particle'; pe.style.backgroundColor = color; pe.style.boxShadow = `0 0 ${size/2}px ${color}`; gameContainer.appendChild(pe); particles.push({ x, y, element: pe, size: Math.random() * size + 2, vx: (Math.random() - 0.5) * 6.5, vy: (Math.random() - 0.5) * 6.5, life: 28 + Math.random() * 22, color: color }); } }
+        function useSkill() { /* ... (same as "Startup Fixed v2") ... */ if (player.skillReady) { playSound('skill'); player.skillReady = false; player.skillCharge = 0; enemies.forEach(e => { e.health -= 30; if(e.health <=0 && e.element.parentNode) createExplosion(e.x + e.w/2, e.y + e.h/2, 20, 20, "var(--game-magenta-dark)");}); if (boss) { boss.health -= 70; createExplosion(boss.x + boss.w/2, boss.y + boss.h/2, 40, 40, "var(--game-red-dark)"); updateBossHealthBar(); } enemyBullets.forEach(eb => { if (eb.element && eb.element.parentNode) gameContainer.removeChild(eb.element);}); enemyBullets = []; const sf = document.createElement('div'); Object.assign(sf.style, { position: 'absolute', top: '0', left: '0', width: GAME_WIDTH + 'px', height: GAME_HEIGHT + 'px', backgroundColor: 'rgba(255, 182, 193, 0.6)', zIndex: '15'}); gameContainer.appendChild(sf); setTimeout(() => { if (sf.parentNode) gameContainer.removeChild(sf); }, 200); updateUI(); }}
+        function checkCollision(r1, r2) { /* ... (same as "Startup Fixed v2") ... */ return r1.x < r2.x + r2.w && r1.x + r1.w > r2.x && r1.y < r2.y + r2.h && r1.y + r1.h > r2.y; }
+        function playerHit() { /* ... (same as "Startup Fixed v2") ... */ if (!player.isHit) { playSound('hit'); player.lives--; player.isHit = true; player.hitTimer = 75; if (player.weaponLevel > 1) { player.weaponLevel--; player.maxShootCooldown = Math.min(25, player.maxShootCooldown + 3.5); } updatePlayerSVG(); playerElement.style.transform = 'translateY(7px)'; setTimeout(() => playerElement.style.transform = 'translateY(0px)', 130); if (player.lives <= 0) { gameState = 'gameover'; gameOverScreen.style.display = 'flex'; finalScoreDisplay.textContent = `你的最终探索深度: ${player.score}`; gameOverTitle.textContent = "旅途暂歇"; playSound('explosion_large', 0.4, 1.0, 400, 30); exitFullscreenButtonGameover.style.display = (document.fullscreenElement || document.webkitFullscreenElement) ? 'inline-block' : 'none'; removeTouchControls(); /* ADDED THIS */ } updateUI(); }}
+        
+        function gameLoop(timestamp) {
+            if (gameState !== 'playing') {
+                if (gameLoopId) cancelAnimationFrame(gameLoopId);
+                gameLoopId = requestAnimationFrame(gameLoop); 
+                return;
+            }
+
+            // Player movement: Prioritize touch if active, else keyboard
+            if (!touching) { // Only use keyboard if not actively touching
+                if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+                if (keys['ArrowRight'] && player.x < GAME_WIDTH - player.w) player.x += player.speed;
+                if (keys['ArrowUp'] && player.y > 0) player.y -= player.speed;
+                if (keys['ArrowDown'] && player.y < GAME_HEIGHT - player.h) player.y += player.speed;
+            }
+            // ... (Rest of gameLoop logic is identical to "Startup Fixed v2" / "Dynamic Gradient")
+            if (player.isHit) { player.hitTimer--; if (player.hitTimer <= 0) player.isHit = false; playerElement.style.opacity = (player.hitTimer % 14 < 7) ? '0.35' : '1'; } else { playerElement.style.opacity = '1';} player.shootCooldown--; if (player.shootCooldown <= 0) { createBullet(); player.shootCooldown = player.maxShootCooldown; } bullets.forEach((b, i) => { if (b.dx !== undefined) { b.x += b.dx * b.speed; b.y += b.dy * b.speed; } else { b.y -= b.speed; } if (b.y < -b.h || b.x < -b.w || b.x > GAME_WIDTH) { if(b.element.parentNode) b.element.parentNode.removeChild(b.element); bullets.splice(i, 1); }}); enemyBullets.forEach((eb, i) => { if (eb.dx !== undefined && eb.dy !== undefined) { eb.x += eb.dx * eb.speed; eb.y += eb.dy * eb.speed;} else { eb.y += eb.speed; } if (eb.y > GAME_HEIGHT || eb.y < -eb.h || eb.x < -eb.w || eb.x > GAME_WIDTH) { if(eb.element.parentNode) eb.element.parentNode.removeChild(eb.element); enemyBullets.splice(i, 1); }}); if (!bossActive) { enemySpawnTimer--; if (enemySpawnTimer <= 0) { createEnemy(); const diff = Math.max(0.2, 1 - (player.score / (scoreForBoss * 2))); enemySpawnTimer = baseEnemySpawnInterval * diff * (0.7 + Math.random() * 0.6); }} enemies.forEach((e, i) => { e.y += e.speed; if (e.vx) e.x += e.vx; if (e.pattern === 'sine') e.x += Math.sin(e.phase + e.y * 0.05) * (e.amplitude / 60); if ((e.vx || e.pattern === 'sine') && (e.x < 0 || e.x > GAME_WIDTH - e.w)) { e.x = Math.max(0, Math.min(e.x, GAME_WIDTH - e.w)); if(e.vx) e.vx *= -1; } e.shootCD--; if (e.shootCD <= 0 && e.y > 0 && e.y < GAME_HEIGHT * 0.8) { enemyShootLogic(e); e.shootCD = e.maxShootCD * (0.65 + Math.random()*0.7); } if (e.y > GAME_HEIGHT) { if(e.element.parentNode) e.element.parentNode.removeChild(e.element); enemies.splice(i, 1); }}); if (bossActive && boss) { boss.x += boss.moveDir * boss.moveSpeed; if (boss.x <= 0 || boss.x + boss.w >= GAME_WIDTH) boss.moveDir *= -1; bossShootLogic(); } powerUps.forEach((pu, i) => { pu.y += pu.speed; if (pu.y > GAME_HEIGHT) { if(pu.element.parentNode) pu.element.parentNode.removeChild(pu.element); powerUps.splice(i, 1); }}); particles.forEach((p, i) => { p.x += p.vx; p.y += p.vy; p.life--; p.element.style.opacity = p.life / 30; if (p.life <= 0) { if(p.element.parentNode) p.element.parentNode.removeChild(p.element); particles.splice(i, 1); }}); for (let i = bullets.length - 1; i >= 0; i--) { let bulletHitThisFrame = false; for (let j = enemies.length - 1; j >= 0; j--) { if (bullets[i] && enemies[j] && checkCollision(bullets[i], enemies[j])) { enemies[j].health--; enemies[j].element.style.filter = 'brightness(1.7) saturate(1.6)'; setTimeout(() => { if(enemies[j] && enemies[j].element) enemies[j].element.style.filter = 'brightness(1)';}, 50); if (enemies[j].health <= 0) { player.score += enemies[j].points; player.skillCharge = Math.min(player.maxSkillCharge, player.skillCharge + enemies[j].points / 1.7); if (player.skillCharge >= player.maxSkillCharge && !player.skillReady) { player.skillReady = true; playSound('powerup'); } createExplosion(enemies[j].x + enemies[j].w/2, enemies[j].y + enemies[j].h/2, 13, 13, enemies[j].svgC.stroke); if (Math.random() < 0.2) createPowerUp(enemies[j].x + enemies[j].w/2, enemies[j].y + enemies[j].h/2); if(enemies[j].element.parentNode) enemies[j].element.parentNode.removeChild(enemies[j].element); enemies.splice(j, 1); } bulletHitThisFrame = true; break; } } if (bulletHitThisFrame) { if(bullets[i] && bullets[i].element.parentNode) bullets[i].element.parentNode.removeChild(bullets[i].element); if(bullets[i]) bullets.splice(i, 1); continue; } if (bossActive && boss && bullets[i] && checkCollision(bullets[i], boss)) { boss.health--; updateBossHealthBar(); boss.element.style.filter = 'brightness(2) contrast(1.4)'; setTimeout(() => { if(boss && boss.element) boss.element.style.filter = 'brightness(1)';}, 60); if (boss.health <= 0) { player.score += boss.points; createExplosion(boss.x + boss.w/2, boss.y + boss.h/2, 50, 70, BOSS_DONUT_COLORS.donut_icing.stroke); playSound('explosion_large', 0.5, 1.5, 600, 100); if(boss.element.parentNode) boss.element.parentNode.removeChild(boss.element); boss = null; bossActive = false; bossHealthContainer.style.display = 'none'; player.skillCharge = player.maxSkillCharge; player.skillReady = true; gameState = 'gameover'; gameOverScreen.style.display = 'flex'; finalScoreDisplay.textContent = `梦境守护成功! 得分: ${player.score}`; gameOverTitle.textContent = "胜利！"; exitFullscreenButtonGameover.style.display = (document.fullscreenElement || document.webkitFullscreenElement) ? 'inline-block' : 'none'; removeTouchControls(); } if(bullets[i] && bullets[i].element.parentNode) bullets[i].element.parentNode.removeChild(bullets[i].element); if(bullets[i]) bullets.splice(i, 1); } updateUI(); } for (let i = enemyBullets.length - 1; i >= 0; i--) { if (enemyBullets[i] && checkCollision(enemyBullets[i], player)) { if(enemyBullets[i].element.parentNode) enemyBullets[i].element.parentNode.removeChild(enemyBullets[i].element); enemyBullets.splice(i, 1); playerHit(); break; }} for (let i = enemies.length - 1; i >= 0; i--) { if (enemies[i] && checkCollision(enemies[i], player)) { playerHit(); createExplosion(enemies[i].x + enemies[i].w/2, enemies[i].y + enemies[i].h/2, 10); if(enemies[i].element.parentNode) enemies[i].element.parentNode.removeChild(enemies[i].element); enemies.splice(i, 1); break;}} for (let i = powerUps.length - 1; i >= 0; i--) { if (powerUps[i] && checkCollision(powerUps[i], player)) { playSound('powerup'); const pu = powerUps[i]; if (pu.type === 'P') { if (player.weaponLevel < 3) { player.weaponLevel++; updatePlayerSVG(); player.maxShootCooldown = Math.max(8, player.maxShootCooldown - 4);} else { player.score += 70; } } else if (pu.type === 'S') { player.skillCharge = Math.min(player.maxSkillCharge, player.skillCharge + 45); if (player.skillCharge >= player.maxSkillCharge && !player.skillReady) player.skillReady = true; } else if (pu.type === '+') { if (player.lives < 5) player.lives++; else player.score += 50; } if(pu.element.parentNode) pu.element.parentNode.removeChild(pu.element); powerUps.splice(i, 1); updateUI(); break;}} if (!bossActive && player.score >= scoreForBoss && enemies.length < 4) { enemies.forEach(e => { if (e.element.parentNode) e.element.parentNode.removeChild(e.element); }); enemies = []; enemyBullets.forEach(eb => { if (eb.element.parentNode) eb.element.parentNode.removeChild(eb.element); }); enemyBullets = []; createBoss(); } playerElement.style.left = player.x + 'px'; playerElement.style.top = player.y + 'px'; bullets.forEach(b => { if(b.element) {b.element.style.left = b.x + 'px'; b.element.style.top = b.y + 'px';}}); enemyBullets.forEach(eb => { if(eb.element) {eb.element.style.left = eb.x + 'px'; eb.element.style.top = eb.y + 'px';}}); enemies.forEach(e => { if(e.element) {e.element.style.left = e.x + 'px'; e.element.style.top = e.y + 'px';}}); if (boss && boss.element) { boss.element.style.left = boss.x + 'px'; boss.element.style.top = boss.y + 'px';} powerUps.forEach(pu => { if(pu.element) {pu.element.style.left = pu.x + 'px'; pu.element.style.top = pu.y + 'px';}}); particles.forEach(p => { if(p.element) { p.element.style.left = p.x - p.size/2 + 'px'; p.element.style.top = p.y - p.size/2 + 'px'; p.element.style.width = p.size + 'px'; p.element.style.height = p.size + 'px'; }});
+            
+            if (gameState === 'playing') { 
+                gameLoopId = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // --- Touch Control Functions ---
+        function setupTouchControls() {
+            console.log("Setting up touch controls for gameContainer.");
+            gameContainer.addEventListener('touchstart', handleTouchStart, { passive: false });
+            gameContainer.addEventListener('touchmove', handleTouchMove, { passive: false });
+            gameContainer.addEventListener('touchend', handleTouchEnd, { passive: false });
+        }
+
+        function removeTouchControls() {
+            console.log("Removing touch controls.");
+            gameContainer.removeEventListener('touchstart', handleTouchStart);
+            gameContainer.removeEventListener('touchmove', handleTouchMove);
+            gameContainer.removeEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleTouchStart(event) {
+            event.preventDefault();
+            if (gameState !== 'playing' || !event.touches.length) return;
+            initAudio(); // Good place to ensure audio context is running
+            touching = true;
+            // For absolute positioning, we just need to update on move.
+            // If you want player to jump to first touch, add logic here.
+            // For this version, player only moves on touchmove.
+            console.log("Touch Start - Player movement will follow on move.");
+        }
+
+        function handleTouchMove(event) {
+            event.preventDefault();
+            if (!touching || gameState !== 'playing' || !event.touches.length) return;
+
+            const touch = event.touches[0];
+            const rect = gameContainer.getBoundingClientRect();
+            let touchGameX = touch.clientX - rect.left;
+            let touchGameY = touch.clientY - rect.top;
+
+            // Ensure touch coordinates are scaled if game view is scaled (e.g. in fullscreen if not 1:1)
+            // This example assumes gameContainer's visual size matches its logical GAME_WIDTH/HEIGHT.
+            // If there's scaling, you'd need:
+            // touchGameX = touchGameX * (GAME_WIDTH / gameContainer.offsetWidth);
+            // touchGameY = touchGameY * (GAME_HEIGHT / gameContainer.offsetHeight);
+
+
+            player.x = touchGameX - player.w / 2;
+            player.y = touchGameY - player.h / 2;
+
+            player.x = Math.max(0, Math.min(player.x, GAME_WIDTH - player.w));
+            player.y = Math.max(0, Math.min(player.y, GAME_HEIGHT - player.h));
+        }
+
+        function handleTouchEnd(event) {
+            event.preventDefault();
+            // We only care about the 'end' of the last touch for double tap
+            // if (gameState !== 'playing' || event.touches.length > 0) { 
+            // The above line is problematic as event.touches is empty on touchend
+            if (gameState !== 'playing') {
+                 touching = false; // Always reset if not playing
+                 return;
+            }
+            
+            const currentTime = new Date().getTime();
+            if (currentTime - lastTouchEndTime < DOUBLE_TAP_THRESHOLD) {
+                // This is a very basic double tap, doesn't check for movement.
+                console.log("Double tap detected - Firing skill!");
+                useSkill();
+                lastTouchEndTime = 0; // Prevent triple tap as double
+            } else {
+                lastTouchEndTime = currentTime;
+            }
+            
+            // Only set touching to false if ALL touches are up.
+            // event.touches.length will be 0 on the final touchend.
+            if (event.touches.length === 0) {
+                touching = false;
+                console.log("All touches ended.");
+            }
+        }
+        
+        // Fullscreen Logic (same as "Startup Fixed v2")
+        function toggleFullScreen(element = gameContainer) { /* ... (same) ... */ console.log("toggleFullScreen called for element:", element); if (!document.fullscreenElement && !document.mozFullScreenElement && !document.webkitFullscreenElement && !document.msFullscreenElement) { console.log("Requesting fullscreen..."); if (element.requestFullscreen) { element.requestFullscreen().catch(err => console.error("FS Error:", err)); } else if (element.mozRequestFullScreen) { element.mozRequestFullScreen(); } else if (element.webkitRequestFullscreen) { element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT); } else if (element.msRequestFullscreen) { element.msRequestFullscreen(); } } else { console.log("Exiting fullscreen..."); if (document.exitFullscreen) { document.exitFullscreen().catch(err => console.error("Exit FS Error:", err)); } else if (document.mozCancelFullScreen) { document.mozCancelFullScreen(); } else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } else if (document.msExitFullscreen) { document.msExitFullscreen(); } } }
+        document.addEventListener('fullscreenchange', handleFullscreenChange); document.addEventListener('webkitfullscreenchange', handleFullscreenChange); document.addEventListener('mozfullscreenchange', handleFullscreenChange); document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+        function handleFullscreenChange() { /* ... (same, ensures GAME_WIDTH/HEIGHT update) ... */ console.log("Fullscreen state changed."); const isFullscreen = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement); console.log("Is fullscreen:", isFullscreen); setTimeout(() => { GAME_WIDTH = gameContainer.clientWidth; GAME_HEIGHT = gameContainer.clientHeight; console.log("New dimensions after FS change:", GAME_WIDTH, GAME_HEIGHT); if (gameState === 'playing' && player && typeof player.x !== 'undefined') { player.x = Math.max(0, Math.min(player.x, GAME_WIDTH - player.w)); player.y = Math.max(0, Math.min(player.y, GAME_HEIGHT - player.h)); } if(gameState === 'gameover') { exitFullscreenButtonGameover.style.display = isFullscreen ? 'inline-block' : 'none'; } }, 150); }
+        
+        // Event Listeners for Keyboard (kept as fallback / desktop)
+        window.addEventListener('keydown', (e) => { if (gameState === 'playing' && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Space'].includes(e.code)) { e.preventDefault(); } keys[e.code] = true; });
+        window.addEventListener('keyup', (e) => { keys[e.code] = false; if (e.code === 'Space' && gameState === 'playing') { e.preventDefault(); useSkill(); }});
+        
+        startButton.addEventListener('click', () => { console.log("Start button clicked."); initAudio(); initGame(); console.log("initGame successfully called from startButton."); });
+        fullscreenButton.addEventListener('click', () => { console.log("Fullscreen button clicked."); initAudio(); toggleFullScreen(gameContainer); });
+        restartButton.addEventListener('click', () => { console.log("Restart button clicked."); initAudio(); initGame(); console.log("initGame successfully called from restartButton."); });
+        exitFullscreenButtonGameover.addEventListener('click', () => { console.log("Exit fullscreen (gameover) button clicked."); toggleFullScreen(gameContainer); });
+
+        console.log("Adding initial gameLoop request for start screen."); if (gameLoopId) cancelAnimationFrame(gameLoopId); gameLoopId = requestAnimationFrame(gameLoop); console.log("Initial gameLoop for start screen requested with ID:", gameLoopId);
+
+    </script>
+</body>
+</html>
